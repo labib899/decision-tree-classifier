@@ -1,0 +1,29 @@
+digraph {
+	node [shape=ellipse]
+	0 [label="X[2] <= 1.9
+Info Gain: 0.3437"]
+	1 [label="Leaf: Setosa"]
+	0 -> 1 [label=True]
+	2 [label="X[2] <= 4.7
+Info Gain: 0.3970"]
+	0 -> 2 [label=False]
+	5 [label="Leaf: Versicolor"]
+	2 -> 5 [label=True]
+	6 [label="X[3] <= 1.7
+Info Gain: 0.0627"]
+	2 -> 6 [label=False]
+	13 [label="X[2] <= 4.9
+Info Gain: 0.1667"]
+	6 -> 13 [label=True]
+	27 [label="Leaf: Versicolor"]
+	13 -> 27 [label=True]
+	28 [label="Leaf: Virginica"]
+	13 -> 28 [label=False]
+	14 [label="X[2] <= 4.8
+Info Gain: 0.0154"]
+	6 -> 14 [label=False]
+	29 [label="Leaf: Virginica"]
+	14 -> 29 [label=True]
+	30 [label="Leaf: Virginica"]
+	14 -> 30 [label=False]
+}

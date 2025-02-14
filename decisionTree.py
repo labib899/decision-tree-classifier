@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import KFold
 from sklearn.metrics import confusion_matrix
+from graphviz import Digraph
 
 
 class Node():
@@ -114,21 +115,6 @@ class DecisionTreeClassifier():
         Y = list(Y)
         return max(Y, key=Y.count)
     
-    def print_tree(self, tree=None, indent=" "):
-        ''' function to print the tree '''
-        
-        if not tree:
-            tree = self.root
-
-        if tree.value is not None:
-            print(tree.value)
-
-        else:
-            print("X_"+str(tree.feature_index), "<=", tree.threshold, "?       info_gain:", tree.info_gain)
-            print("%sleft:" % (indent), end="")
-            self.print_tree(tree.left, indent + indent)
-            print("%sright:" % (indent), end="")
-            self.print_tree(tree.right, indent + indent)
     
     def fit(self, X, Y):
         ''' function to train the tree '''
@@ -151,6 +137,33 @@ class DecisionTreeClassifier():
             return self.make_prediction(x, tree.left)
         else:
             return self.make_prediction(x, tree.right)
+        
+    def export_tree_graph(self, tree=None, graph=None, node_id=0, parent_id=None, label=""):
+        ''' Recursive function to export the tree as a graph '''
+        if graph is None:
+            graph = Digraph(format='png')
+            graph.attr('node', shape='ellipse')
+
+        if tree is None:
+            tree = self.root
+
+        node_label = ""
+        if tree.value is not None:  # Leaf node
+            node_label = f"Leaf: {tree.value}"
+        else:  # Decision node
+            node_label = f"X[{tree.feature_index}] <= {tree.threshold}\nInfo Gain: {tree.info_gain:.4f}"
+
+        graph.node(str(node_id), label=node_label)
+
+        if parent_id is not None:
+            graph.edge(str(parent_id), str(node_id), label=label)
+
+        if tree.left:
+            self.export_tree_graph(tree.left, graph, node_id=node_id * 2 + 1, parent_id=node_id, label="True")
+        if tree.right:
+            self.export_tree_graph(tree.right, graph, node_id=node_id * 2 + 2, parent_id=node_id, label="False")
+
+        return graph
         
 
 
@@ -182,11 +195,13 @@ def k_fold_cross_validation(X, Y, k, min_samples_split=3, max_depth=3):
         cm = confusion_matrix(Y_test, Y_pred)
         #print(f'Confusion matrix for fold {fold}:\n{cm}\n')
     
-    classifier.print_tree()
+    tree_graph = classifier.export_tree_graph()
+    tree_graph.render("decision_tree", view=True)  # Export tree as PNG
     return accuracy_scores
 
 
 k = 10
 accuracy_scores = k_fold_cross_validation(X, Y, k)
+
 print(f'Accuracy score for each fold: {accuracy_scores}')
 print(f'Mean accuracy: {np.mean(accuracy_scores)}')
